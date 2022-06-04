@@ -9,14 +9,12 @@ class Mqtt
 
     public function __construct()
     {
-        $this->mqtt = new \PhpMqtt\Client\MqttClient(host: 'solar-assistant.local');
-        echo "created";
+        $this->mqtt = new \PhpMqtt\Client\MqttClient(host: 'petuniilor.go.ro');
         $this->mqtt->connect();
     }
 
     public function subscribe()
     {
-        echo "inside the subscribe function";
         $this->mqtt->subscribe('#', function ($topic, $message) {
             echo sprintf("Received message on topic [%s]: %s\n", $topic, $message);
         }, 0);
