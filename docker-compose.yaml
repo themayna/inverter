@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  inverter:
+    build:
+      context: .
+      target: base
+    volumes:
+      - ./:/var/www/html/
+    ports:
+      - 8000:80
