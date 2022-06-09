@@ -44,6 +44,7 @@ class Mqtt
                         'body' => json_encode(['data' => ['switch' => 'on']])
                     ]
                 );
+                $this->status = true;
                 echo "Turned the grid ON";
             }
             if ($percent == 40 && $this->status == true) {
@@ -55,6 +56,7 @@ class Mqtt
                         'body' => json_encode(['data' => ['switch' => 'off']])
                     ]
                 );
+                $this->status = false;
                 echo "Turned the grid OFF";
             }
         }, 0);
