@@ -31,7 +31,7 @@ class Mqtt
     {
         $this->mqtt->subscribe('solar_assistant/total/battery_state_of_charge/state', function ($topic, $percent) {
             echo sprintf(
-                "Battery percentage is %s and switch is tunned %s\n",
+                "Battery percentage is at %s and switch is tunned %s\n",
                 $percent,
                 $this->status == true ? "On" : "Off"
             );
@@ -45,7 +45,7 @@ class Mqtt
                     ]
                 );
                 $this->status = true;
-                echo "Turned the grid ON";
+                echo "Turned the grid ON\n";
             }
             if ($percent == 40 && $this->status == true) {
                 //stop la retea
@@ -57,7 +57,7 @@ class Mqtt
                     ]
                 );
                 $this->status = false;
-                echo "Turned the grid OFF";
+                echo "Turned the grid OFF\n";
             }
         }, 0);
         $this->mqtt->loop();
