@@ -22,7 +22,7 @@ class Mqtt
         );
         $info = json_decode($response->getBody()->getContents(),true);
 
-        $this->status = $info['data']['switch'] = 'on' ? true : false;
+        $this->status = $info['data']['switch'] == 'on' ? true : false;
 
         $this->mqtt->connect();
     }
