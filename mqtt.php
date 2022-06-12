@@ -47,7 +47,7 @@ class Mqtt
                 $this->status = true;
                 echo "Turned the grid ON\n";
             }
-            if ($percent == 40 && $this->status == true) {
+            if ($percent == 42 && $this->status == true) {
                 //stop la retea
                 $this->client->request(
                     method: 'POST',
