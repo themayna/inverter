@@ -7,7 +7,8 @@ class Mqtt
     protected $mqtt;
     protected $client;
     const HOST = 'petuniilor.go.ro';
-    protected $status;
+    protected $switch;
+    protected $state;
 
     public function __construct()
     {
@@ -20,22 +21,26 @@ class Mqtt
                 'body' => json_encode(['deviceid', 'data' => []])
             ]
         );
-        $info = json_decode($response->getBody()->getContents(),true);
+        $info = json_decode($response->getBody()->getContents(), true);
 
-        $this->status = $info['data']['switch'] == 'on' ? true : false;
+        $this->switch = $info['data']['switch'] == 'on' ? true : false;
 
         $this->mqtt->connect();
     }
 
     public function subscribe()
     {
+        $this->mqtt->subscribe('solar_assistant/inverter_1/device_mode/state', function ($topic, $message) {
+            $this->state = $message;
+        }, 0);
+
         $this->mqtt->subscribe('solar_assistant/total/battery_state_of_charge/state', function ($topic, $percent) {
             echo sprintf(
                 "Battery percentage is at %s and switch is tunned %s\n",
                 $percent,
-                $this->status == true ? "On" : "Off"
+                $this->switch == true ? "On" : "Off"
             );
-            if ($percent == 32 && $this->status == false) {
+            if ($percent <= 32 && $this->switch == false) {
                 //start la retea
                 $this->client->request(
                     method: 'POST',
@@ -44,10 +49,10 @@ class Mqtt
                         'body' => json_encode(['data' => ['switch' => 'on']])
                     ]
                 );
-                $this->status = true;
+                $this->switch = true;
                 echo "Turned the grid ON\n";
             }
-            if ($percent == 42 && $this->status == true) {
+            if ($percent >= 42 && $this->switch == true && $this->state == 'Solar/Battery') {
                 //stop la retea
                 $this->client->request(
                     method: 'POST',
@@ -56,7 +61,7 @@ class Mqtt
                         'body' => json_encode(['data' => ['switch' => 'off']])
                     ]
                 );
-                $this->status = false;
+                $this->switch = false;
                 echo "Turned the grid OFF\n";
             }
         }, 0);
