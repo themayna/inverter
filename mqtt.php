@@ -52,7 +52,7 @@ class Mqtt
                 $this->switch = true;
                 echo "Turned the grid ON\n";
             }
-            if ($percent >= 42 && $this->switch == true && $this->state == 'Solar/Battery') {
+            if ($percent >= 35 && $this->switch == true && $this->state == 'Solar/Battery') {
                 //stop la retea
                 $this->client->request(
                     method: 'POST',
