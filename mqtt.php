@@ -6,7 +6,8 @@ class Mqtt
 {
     protected $mqtt;
     protected $client;
-    const HOST = 'petuniilor.go.ro';
+    const SOLAR_HOST = '192.168.100.108';
+    const SONOFF_HOST = '192.168.100.130:8081';
     protected $switch;
     protected $state;
 
@@ -17,22 +18,27 @@ class Mqtt
 
     protected function initConnection()
     {
-        $this->mqtt = new \PhpMqtt\Client\MqttClient(host: self::HOST);
-        $this->client = new GuzzleHttp\Client();
-        $response = $this->client->request(
-            method: 'POST',
-            uri: self::HOST . ':35001/zeroconf/info',
-            options: [
-                'body' => json_encode(['deviceid', 'data' => []])
-            ]
-        );
-        $info = json_decode($response->getBody()->getContents(), true);
+        try {
+            $this->mqtt = new \PhpMqtt\Client\MqttClient(host: self::SOLAR_HOST);
+            $this->client = new GuzzleHttp\Client();
+            $response = $this->client->request(
+                method: 'POST',
+                uri: self::SONOFF_HOST . '/zeroconf/info',
+                options: [
+                    'body' => json_encode(['deviceid', 'data' => []])
+                ]
+            );
+            $info = json_decode($response->getBody()->getContents(), true);
 
-        $this->switch = $info['data']['switch'] == 'on' ? true : false;
+            $this->switch = $info['data']['switch'] == 'on' ? true : false;
 
-        $this->mqtt->connect();
+            $this->mqtt->connect();
 
-        return $this;
+            return $this;
+        } catch (Throwable $exception) {
+            echo sprintf($exception->getMessage());
+            $this->initConnection()->subscribe();
+        }
     }
 
     public function subscribe()
@@ -52,7 +58,7 @@ class Mqtt
 //                  start la retea
                     $this->client->request(
                         method: 'POST',
-                        uri: self::HOST . ':35001/zeroconf/switch',
+                        uri: self::SONOFF_HOST . '/zeroconf/switch',
                         options: [
                             'body' => json_encode(['data' => ['switch' => 'on']])
                         ]
@@ -64,7 +70,7 @@ class Mqtt
 //                    stop la retea
                     $this->client->request(
                         method: 'POST',
-                        uri: self::HOST . ':35001/zeroconf/switch',
+                        uri: self::SONOFF_HOST . '/zeroconf/switch',
                         options: [
                             'body' => json_encode(['data' => ['switch' => 'off']])
                         ]
