@@ -6,10 +6,12 @@ class Mqtt
 {
     protected $mqtt;
     protected $client;
-    const SOLAR_HOST = '192.168.100.108';
-    const SONOFF_HOST = '192.168.100.130:8081';
     protected $switch;
     protected $state;
+    const SOLAR_HOST = '192.168.100.108';
+    const SONOFF_HOST = '192.168.100.130:8081';
+    const   LOW = 35;
+    const HIGHT = 40;
 
     public function __construct()
     {
@@ -54,7 +56,7 @@ class Mqtt
                     $percent,
                     $this->switch == true ? "On" : "Off"
                 );
-                if ($percent <= 35 && $this->switch == false) {
+                if ($percent <= self::LOW && $this->switch == false) {
 //                  start la retea
                     $this->client->request(
                         method: 'POST',
@@ -66,7 +68,7 @@ class Mqtt
                     $this->switch = true;
                     echo "Turned the grid ON\n";
                 }
-                if ($percent >= 40 && $this->switch == true && $this->state == 'Solar/Battery') {
+                if ($percent >= self::HIGHT && $this->switch == true && $this->state == 'Solar/Battery') {
 //                    stop la retea
                     $this->client->request(
                         method: 'POST',
